@@ -100,7 +100,7 @@ public class LS extends javax.swing.JFrame {
 	int j = thisButton.get_j();
 	System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
 
-	// Check if this square is empty.
+	// TODO: 1) Check if this square is empty.
 	// If it is empty then place a HUMAN mark (X) in it and check if it was a winning move
 
 	// In this version no checks are done, the marks just alter between HUMAN and COMPUTER
@@ -116,15 +116,18 @@ public class LS extends javax.swing.JFrame {
 
 	// Give the turn to the opponent
 	turn = (turn == HUMAN) ? COMPUTER : HUMAN;
+
+    // TODO: 2) Create Backtracking -method
 	// In a real game, you should instead call a method and compute the response move of the computer
 	// The computer chooses a successor position with a maximal value
 	
-	// Check if we are done (that is COMPUTER or HUMAN wins)
+	// TODO: 3) Check if we are done (that is COMPUTER or HUMAN wins)
 	if (checkResult() != CONTINUE) {
 	    return;
 	}
     }
 
+    // TODO: 4) This
     private int checkResult() {
 	// This function should check if one player (HUMAN or COMPUTER) wins, if the board is full (DRAW)
 	// or if the game should continue. You implement this.
