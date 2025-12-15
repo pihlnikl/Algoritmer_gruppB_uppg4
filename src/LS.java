@@ -4,7 +4,7 @@ import java.awt.*;
 
 // Class to represent Move objects
 class Move {
-    int val;   // Value of th emov
+    int val;   // Value of the move
     int row;   // Row and column coordinates
     int col;
     
@@ -12,6 +12,87 @@ class Move {
 	val=v;
 	row=r;
 	col=c;
+    }
+
+    public Move immediateCompWin() {
+        return null;
+    }
+
+    public int[] getCoordinates(int position) {
+        int[] coordinates = new int[2];
+        // Get row (y) and column (x) of the position
+        coordinates[0] = (position - 1) / LS.SIZE;
+        coordinates[1] = (position - 1) % LS.SIZE;
+        return coordinates;
+    }
+
+    public Move findCompMove(int alpha, int beta) {
+        int responseValue;
+        int value;
+        int bestMove = 1;
+        Move quickWinInfo;
+
+        if (LS.fullBoard()) {
+            value = LS.DRAW;
+            return new Move(-1, -1, value);
+        }
+        else {
+            quickWinInfo = immediateCompWin();
+            if (quickWinInfo != null) {
+                return quickWinInfo;
+            }
+            else {
+                value = alpha;
+                for (int i = 1; i < 9 && value < beta; i++) {
+                    int[] coordinates = getCoordinates(i);
+                    if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                        LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
+                        responseValue = findHumanMove(value, beta).val;
+                        LS.unplace(coordinates[0], coordinates[1]);
+                        if (responseValue > value) {
+                            value = responseValue;
+                            bestMove = i;
+                        }
+                    }
+                }
+            }
+            return new Move(getCoordinates(bestMove)[0], getCoordinates(bestMove)[1], value);
+        }
+    }
+
+    public Move findHumanMove(int compValue, int beta) {
+        int responseValue;
+        int value;
+        int bestMove = 1;
+        Move quickWinInfo;
+
+        if (LS.fullBoard()) {
+            value = LS.DRAW;
+            return new Move(-1, -1, value);
+        }
+
+        else {
+            quickWinInfo = immediateCompWin();
+            if (quickWinInfo != null) {
+                return quickWinInfo;
+            }
+            else {
+                value = compValue;
+                for (int i = 1; i < 9 && value < beta; i++) {
+                    int[] coordinates = getCoordinates(i);
+                    if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                        LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                        responseValue = findCompMove(value, beta).val;
+                        LS.unplace(coordinates[0], coordinates[1]);
+                        if (responseValue < value) {
+                            value = responseValue;
+                            bestMove = i;
+                        }
+                    }
+                }
+            }
+            return new Move(getCoordinates(bestMove)[0], getCoordinates(bestMove)[1], value);
+        }
     }
 }
 
@@ -54,7 +135,7 @@ public class LS extends javax.swing.JFrame {
     public static final int COMPUTER_WIN = 7;
     
     public static final int SIZE = 3;
-    private int[][] board = new int[SIZE][SIZE];  // The marks on the board
+    private static int[][] board = new int[SIZE][SIZE];  // The marks on the board
     private javax.swing.JButton[][] jB;           // The buttons of the board
     private int turn = HUMAN;                    // HUMAN starts the game
 
@@ -92,19 +173,22 @@ public class LS extends javax.swing.JFrame {
 	pack();
     }
 
+    // TODO: 1) Implement this method
+    public static boolean isEmpty(int row, int col) {
+        return false;
+    }
+
     // Action listener which handles mouse clicks on the buttons
     private void jBAction(java.awt.event.ActionEvent act) {
 	Button thisButton = (Button) act.getSource();   // Get the button clicked on
-	// Get the grid coordinates of the clicked button
-	int i = thisButton.get_i();
-	int j = thisButton.get_j();
-	System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
-
-	// TODO: 1) Check if this square is empty.
-	// If it is empty then place a HUMAN mark (X) in it and check if it was a winning move
-
-	// In this version no checks are done, the marks just alter between HUMAN and COMPUTER
-	
+    // Get the grid coordinates of the clicked button
+    int i = thisButton.get_i();
+    int j = thisButton.get_j();
+    System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
+    // TODO: 1) Check if this square is empty.
+    // If it is empty then place a HUMAN mark (X) in it and check if it was a winning move
+    // TODO: Check if winning move
+    // In this version no checks are done, the marks just alter between HUMAN and COMPUTER
 	// Set an X or O mark in the clicked button
 	if (turn == HUMAN) {
 	    thisButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("X.png")));
@@ -112,6 +196,8 @@ public class LS extends javax.swing.JFrame {
 	if (turn == COMPUTER) {
 	    thisButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("O.png")));
 	}
+
+
 	place (i, j, turn);    // Mark the move on the board
 
 	// Give the turn to the opponent
@@ -135,8 +221,18 @@ public class LS extends javax.swing.JFrame {
     }
     
     // Place a mark for one of the playsers (HUMAN or COMPUTER) in the specified position
-    public void place (int row, int col, int player){
+    public static void place(int row, int col, int player){
 	board [row][col] = player;
+    }
+
+    public static void unplace(int row, int col) {
+        board [row][col] = EMPTY;
+    }
+
+    // TODO: Return true if board is full
+    public static boolean fullBoard() {
+
+        return false;
     }
 
     
