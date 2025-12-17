@@ -15,6 +15,32 @@ class Move {
     }
 
     public Move immediateCompWin() {
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
+                if (LS.checkResult() == LS.COMPUTER_WIN) {
+                    LS.unplace(coordinates[0], coordinates[1]);
+                    return new Move(LS.HUMAN_WIN, coordinates[0], coordinates[1]);
+                }
+                LS.unplace(coordinates[0], coordinates[1]);
+            }
+        }
+        return null;
+    }
+
+    public Move immediateHumanWin() {
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                if (LS.checkResult() == LS.HUMAN_WIN) {
+                    LS.unplace(coordinates[0], coordinates[1]);
+                    return new Move(LS.COMPUTER_WIN, coordinates[0], coordinates[1]);
+                }
+                LS.unplace(coordinates[0], coordinates[1]);
+            }
+        }
         return null;
     }
 
@@ -31,43 +57,48 @@ class Move {
         int value;
         int bestMove = -1;
         Move quickWinInfo;
-        // TODO: Fix switch cases
-        switch (LS.checkResult()) {
-            case LS.DRAW:
-                return new Move(LS.DRAW, -1, -1);
-            case LS.COMPUTER_WIN:
-                return null;
-            case LS.HUMAN_WIN:
-                return null;
-            default:
-                quickWinInfo = immediateCompWin();
-                if (quickWinInfo != null) {
-                    return quickWinInfo;
-                } else {
-                    value = alpha;
-                    for (int i = 1; i < 9; i++) {
-                        int[] coordinates = getCoordinates(i);
-                        if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                            LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
-                            responseValue = findHumanMove(value, beta).val;
-                            LS.unplace(coordinates[0], coordinates[1]);
-                            if (responseValue > value) {
-                                value = responseValue;
-                                bestMove = i;
-                            }
-                            if (value >= beta) {
-                                return new Move(value, -1, -1);
-                            }
+
+        quickWinInfo = immediateCompWin();
+        if (quickWinInfo != null) {
+            return quickWinInfo;
+        } else {
+            value = alpha;
+            for (int i = 1; i <= 9; i++) {
+                int[] coordinates = getCoordinates(i);
+                if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                    LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
+                    responseValue = findHumanMove(value, beta).val;
+                    LS.unplace(coordinates[0], coordinates[1]);
+                    if (responseValue > value) {
+                        value = responseValue;
+                        bestMove = i;
+                    }
+
+                    if (value >= beta) {
+                        if (bestMove != -1) {
+                            coordinates = getCoordinates(bestMove);
+                            return new Move(value, coordinates[0], coordinates[1]);
+                        } else {
+                            return new Move(value, -1, -1);
                         }
                     }
                 }
-                if (bestMove != -1) {
-                    int[] coordinates = getCoordinates(bestMove);
-                    return new Move(value, coordinates[0], coordinates[1]);
-                } else {
-                    return new Move(value, -1, -1);
-                }
+            }
         }
+        if (bestMove != -1) {
+            int[] coordinates = getCoordinates(bestMove);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                return new Move(value, coordinates[0], coordinates[1]);
+            }
+
+        }
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                return new Move(value, 1, 1);
+            }
+        }
+        return new Move(LS.DRAW, -1, -1);
     }
 
     public Move findHumanMove(int compValue, int beta) {
@@ -76,43 +107,46 @@ class Move {
         int bestMove = -1;
         Move quickWinInfo;
 
-        // TODO: Fix Switch cases
-        switch (LS.checkResult()) {
-            case LS.DRAW:
-                return new Move(LS.DRAW, -1, -1);
-            case LS.COMPUTER_WIN:
-                return null;
-            case LS.HUMAN_WIN:
-                return null;
-            default:
-                quickWinInfo = immediateCompWin();
-                if (quickWinInfo != null) {
-                    return quickWinInfo;
-                } else {
-                    value = beta;
-                    for (int i = 1; i < 9; i++) {
-                        int[] coordinates = getCoordinates(i);
-                        if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                            LS.place(coordinates[0], coordinates[1], LS.HUMAN);
-                            responseValue = findCompMove(compValue, value).val;
-                            LS.unplace(coordinates[0], coordinates[1]);
-                            if (responseValue < value) {
-                                value = responseValue;
-                                bestMove = i;
-                            }
-                            if (value <= compValue) {
-                                return new Move(value, -1, -1);
-                            }
+        quickWinInfo = immediateHumanWin();
+        if (quickWinInfo != null) {
+            return quickWinInfo;
+        } else {
+            value = beta;
+            for (int i = 1; i <= 9; i++) {
+                int[] coordinates = getCoordinates(i);
+                if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                    LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                    responseValue = findCompMove(compValue, value).val;
+                    LS.unplace(coordinates[0], coordinates[1]);
+                    if (responseValue < value) {
+                        value = responseValue;
+                        bestMove = i;
+                    }
+                    if (value <= compValue) {
+                        if (bestMove != -1) {
+                            coordinates = getCoordinates(bestMove);
+                            return new Move(value, coordinates[0], coordinates[1]);
+                        } else {
+                            return new Move(value, -1, -1);
                         }
                     }
                 }
-                if (bestMove != -1) {
-                    int[] coordinates = getCoordinates(bestMove);
-                    return new Move(value, coordinates[0], coordinates[1]);
-                } else {
-                    return new Move(value, -1, -1);
-                }
+            }
         }
+        if (bestMove != -1) {
+            int[] coordinates = getCoordinates(bestMove);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                return new Move(value, coordinates[0], coordinates[1]);
+            }
+
+        }
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                return new Move(value, 1, 1);
+            }
+        }
+        return new Move(LS.DRAW, -1, -1);
     }
 }
 // Class Button extends JButton with (x,y) coordinates
@@ -204,30 +238,39 @@ public class LS extends javax.swing.JFrame {
     int i = thisButton.get_i();
     int j = thisButton.get_j();
 
-    System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
-    // TODO: 1) Check if this square is empty.
-    // If it is empty then place a HUMAN mark (X) in it and check if it was a winning move
-    // TODO: Check if winning move
-    // In this version no checks are done, the marks just alter between HUMAN and COMPUTER
-	// Set an X or O mark in the clicked button
+    if (isEmpty(i, j)) {
+        System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
+        thisButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("X.png")));
+        place(i, j, turn);
+        if (checkResult() == HUMAN_WIN) {
+            System.out.println("Player Wins!");
+            return;
+        }
+        if (checkResult() == DRAW) {
+            System.out.println("Draw!");
+            return;
+        }
+        turn = COMPUTER;
 
-    thisButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("X.png")));
-    place(i, j, turn);
+        Move compMove = new Move(0, 0, 1).findCompMove(0, 1);
+        System.out.println("Button[" + compMove.row + "][" + compMove.col + "] was clicked by " + turn);  // DEBUG
+        jB[compMove.row][compMove.col].setIcon(new javax.swing.ImageIcon(getClass().getResource("O.png")));
+        place(compMove.row, compMove.col, turn);
+        if (checkResult() == COMPUTER_WIN) {
+            System.out.println("Computer Wins!");
+            return;
+        }
 
-    turn = COMPUTER;
+    } else {
+        System.out.println("Square is not empty, try another one");
+    }
 
-    Move compMove = new Move(0, 0, 1).findCompMove(0, 1);
-    System.out.println("Button[" + compMove.row + "][" + compMove.col + "] was clicked by " + turn);  // DEBUG
-    jB[compMove.row][compMove.col].setIcon(new javax.swing.ImageIcon(getClass().getResource("O.png")));
-    place(compMove.row, compMove.col, turn);
-
-    turn = HUMAN;
-
-	
 	// TODO: 3) Check if we are done (that is COMPUTER or HUMAN wins)
 	if (checkResult() != CONTINUE) {
+        System.out.println("Draw!");
 	    return;
 	}
+        turn = HUMAN;
     }
 
     // TODO: 4) This
