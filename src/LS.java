@@ -21,7 +21,7 @@ class Move {
                 LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
                 if (LS.checkResult() == LS.COMPUTER_WIN) {
                     LS.unplace(coordinates[0], coordinates[1]);
-                    return new Move(LS.HUMAN_WIN, coordinates[0], coordinates[1]);
+                    return new Move(LS.COMPUTER_WIN, coordinates[0], coordinates[1]);
                 }
                 LS.unplace(coordinates[0], coordinates[1]);
             }
@@ -61,30 +61,35 @@ class Move {
         quickWinInfo = immediateCompWin();
         if (quickWinInfo != null) {
             return quickWinInfo;
-        } else {
-            value = alpha;
-            for (int i = 1; i <= 9; i++) {
-                int[] coordinates = getCoordinates(i);
-                if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                    LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
-                    responseValue = findHumanMove(value, beta).val;
-                    LS.unplace(coordinates[0], coordinates[1]);
-                    if (responseValue > value) {
-                        value = responseValue;
-                        bestMove = i;
-                    }
+        }
+        quickWinInfo = immediateHumanWin();
+        if (quickWinInfo != null) {
+            return quickWinInfo;
+        }
 
-                    if (value >= beta) {
-                        if (bestMove != -1) {
-                            coordinates = getCoordinates(bestMove);
-                            return new Move(value, coordinates[0], coordinates[1]);
-                        } else {
-                            return new Move(value, -1, -1);
-                        }
+        value = alpha;
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
+                responseValue = findHumanMove(value, beta).val;
+                LS.unplace(coordinates[0], coordinates[1]);
+                if (responseValue > value) {
+                    value = responseValue;
+                    bestMove = i;
+                }
+
+                if (value >= beta) {
+                    if (bestMove != -1) {
+                        coordinates = getCoordinates(bestMove);
+                        return new Move(value, coordinates[0], coordinates[1]);
+                    } else {
+                        return new Move(value, -1, -1);
                     }
                 }
             }
         }
+
         if (bestMove != -1) {
             int[] coordinates = getCoordinates(bestMove);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
@@ -95,10 +100,10 @@ class Move {
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                return new Move(value, 1, 1);
+                return new Move(value, coordinates[0], coordinates[1]);
             }
         }
-        return new Move(LS.DRAW, -1, -1);
+        return null;
     }
 
     public Move findHumanMove(int compValue, int beta) {
@@ -110,29 +115,29 @@ class Move {
         quickWinInfo = immediateHumanWin();
         if (quickWinInfo != null) {
             return quickWinInfo;
-        } else {
-            value = beta;
-            for (int i = 1; i <= 9; i++) {
-                int[] coordinates = getCoordinates(i);
-                if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                    LS.place(coordinates[0], coordinates[1], LS.HUMAN);
-                    responseValue = findCompMove(compValue, value).val;
-                    LS.unplace(coordinates[0], coordinates[1]);
-                    if (responseValue < value) {
-                        value = responseValue;
-                        bestMove = i;
-                    }
-                    if (value <= compValue) {
-                        if (bestMove != -1) {
-                            coordinates = getCoordinates(bestMove);
-                            return new Move(value, coordinates[0], coordinates[1]);
-                        } else {
-                            return new Move(value, -1, -1);
-                        }
+        }
+        value = beta;
+        for (int i = 1; i <= 9; i++) {
+            int[] coordinates = getCoordinates(i);
+            if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                responseValue = findCompMove(compValue, value).val;
+                LS.unplace(coordinates[0], coordinates[1]);
+                if (responseValue < value) {
+                    value = responseValue;
+                    bestMove = i;
+                }
+                if (value <= compValue) {
+                    if (bestMove != -1) {
+                        coordinates = getCoordinates(bestMove);
+                        return new Move(value, coordinates[0], coordinates[1]);
+                    } else {
+                        return new Move(value, -1, -1);
                     }
                 }
             }
         }
+
         if (bestMove != -1) {
             int[] coordinates = getCoordinates(bestMove);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
@@ -143,10 +148,10 @@ class Move {
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
-                return new Move(value, 1, 1);
+                return new Move(value, coordinates[0], coordinates[1]);
             }
         }
-        return new Move(LS.DRAW, -1, -1);
+        return null;
     }
 }
 // Class Button extends JButton with (x,y) coordinates
@@ -309,20 +314,13 @@ public class LS extends javax.swing.JFrame {
     
     // Place a mark for one of the playsers (HUMAN or COMPUTER) in the specified position
     public static void place(int row, int col, int player){
-	board [row][col] = player;
+	    board[row][col] = player;
     }
 
     public static void unplace(int row, int col) {
-        board [row][col] = EMPTY;
+        board[row][col] = EMPTY;
     }
 
-    // TODO: Return true if board is full
-    public static boolean fullBoard() {
-
-        return false;
-    }
-
-    
     public static void main (String [] args){
 
 	String threadName = Thread.currentThread().getName();
