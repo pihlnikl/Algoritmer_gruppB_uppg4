@@ -277,7 +277,34 @@ public class LS extends javax.swing.JFrame {
     public static int checkResult() {
 	// This function should check if one player (HUMAN or COMPUTER) wins, if the board is full (DRAW)
 	// or if the game should continue. You implement this.
-	return CONTINUE;
+
+        // check for horizontal or vertical win
+        for (int i=0; i < SIZE; i++) {
+            if (board[i][0] != EMPTY && board[i][0] == board[i][1] && board[i][1] == board[i][2]) {
+                return board[i][0] == HUMAN ? HUMAN_WIN : COMPUTER_WIN;
+            }
+        }
+        for (int j=0; j < SIZE; j++) {
+            if (board[0][j] != EMPTY && board[0][j] == board[1][j] && board[1][j] == board[2][j]) {
+                return board[0][j] == HUMAN ? HUMAN_WIN : COMPUTER_WIN;
+            }
+        }
+        //check for diagonal win
+        if (board[0][0] != EMPTY && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
+            return board[0][0] == HUMAN ? HUMAN_WIN : COMPUTER_WIN;
+        }
+        if (board[0][2] != EMPTY && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+            return board[0][2] == HUMAN ? HUMAN_WIN : COMPUTER_WIN;
+        }
+        //check for a draw
+        for (int i=0; i < SIZE; i++) {
+            for (int j=0; j < SIZE; j++) {
+                if (board[i][j] == EMPTY) {
+                    return CONTINUE;
+                }
+            }
+        }
+        return DRAW;
     }
     
     // Place a mark for one of the playsers (HUMAN or COMPUTER) in the specified position
