@@ -15,8 +15,10 @@ class Move {
     }
 
     public Move immediateCompWin() {
+        // Check if the computer can win with 1 move
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
+            // Iterates each empty square and checks if they give a win
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
                 LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
                 if (LS.checkResult() == LS.COMPUTER_WIN) {
@@ -26,14 +28,18 @@ class Move {
                 LS.unplace(coordinates[0], coordinates[1]);
             }
         }
+        // If no winning move found -> return null
         return null;
     }
 
     public Move immediateHumanWin() {
+        // Check if human can win with 1 move
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
+            // Iterates each empty square and checks if they give a win
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
                 LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                // If human/player has a winning move, block it
                 if (LS.checkResult() == LS.HUMAN_WIN) {
                     LS.unplace(coordinates[0], coordinates[1]);
                     return new Move(LS.COMPUTER_WIN, coordinates[0], coordinates[1]);
@@ -41,6 +47,7 @@ class Move {
                 LS.unplace(coordinates[0], coordinates[1]);
             }
         }
+        // If no winning move found -> return null
         return null;
     }
 
@@ -58,10 +65,12 @@ class Move {
         int bestMove = -1;
         Move quickWinInfo;
 
+        // Check if computer can win with 1 move
         quickWinInfo = immediateCompWin();
         if (quickWinInfo != null) {
             return quickWinInfo;
         }
+        // Check if player can win with 1 move -> block players win if necessary
         quickWinInfo = immediateHumanWin();
         if (quickWinInfo != null) {
             return quickWinInfo;
@@ -70,26 +79,27 @@ class Move {
         value = alpha;
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
+            // Iterate each empty square
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                // Test each square
                 LS.place(coordinates[0], coordinates[1], LS.COMPUTER);
+                // Test how human would optimally respond
                 responseValue = findHumanMove(value, beta).val;
+                // Remove from board after testing
                 LS.unplace(coordinates[0], coordinates[1]);
+                // If move is better than the previous best found, update best move
                 if (responseValue > value) {
                     value = responseValue;
                     bestMove = i;
                 }
-
+                // Once move with higher value than beta is found (optimal move), return that move
                 if (value >= beta) {
-                    if (bestMove != -1) {
-                        coordinates = getCoordinates(bestMove);
-                        return new Move(value, coordinates[0], coordinates[1]);
-                    } else {
-                        return new Move(value, -1, -1);
-                    }
+                    coordinates = getCoordinates(bestMove);
+                    return new Move(value, coordinates[0], coordinates[1]);
                 }
             }
         }
-
+        // If no move has higher value than beta -> return best possible
         if (bestMove != -1) {
             int[] coordinates = getCoordinates(bestMove);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
@@ -97,12 +107,15 @@ class Move {
             }
 
         }
+        // If no best move is found -> return any empty square
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
                 return new Move(value, coordinates[0], coordinates[1]);
             }
         }
+        // Iteration should not come this far -> It would mean that no moves are possible and therefore a draw.
+        // Draw is already checked in LS, but IDE complains of missing return statement without this
         return null;
     }
 
@@ -112,32 +125,36 @@ class Move {
         int bestMove = -1;
         Move quickWinInfo;
 
+        // Check if player can win with 1 move -> block players win if necessary
         quickWinInfo = immediateHumanWin();
         if (quickWinInfo != null) {
             return quickWinInfo;
         }
+
         value = beta;
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
+            // Iterate each empty square
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
+                // Test each square
                 LS.place(coordinates[0], coordinates[1], LS.HUMAN);
+                // Test how computer would optimally respond
                 responseValue = findCompMove(compValue, value).val;
+                // Remove from board after testing
                 LS.unplace(coordinates[0], coordinates[1]);
+                // If move is better than the previous best found, update best move
                 if (responseValue < value) {
                     value = responseValue;
                     bestMove = i;
                 }
+                // Once move with higher value than compValue (alpha) is found (optimal move), return that move
                 if (value <= compValue) {
-                    if (bestMove != -1) {
                         coordinates = getCoordinates(bestMove);
                         return new Move(value, coordinates[0], coordinates[1]);
-                    } else {
-                        return new Move(value, -1, -1);
-                    }
                 }
             }
         }
-
+        // If no move has higher value than alpha -> return best possible
         if (bestMove != -1) {
             int[] coordinates = getCoordinates(bestMove);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
@@ -145,12 +162,15 @@ class Move {
             }
 
         }
+        // If no best move is found -> return any empty square
         for (int i = 1; i <= 9; i++) {
             int[] coordinates = getCoordinates(i);
             if (LS.isEmpty(coordinates[0], coordinates[1])) {
                 return new Move(value, coordinates[0], coordinates[1]);
             }
         }
+        // Iteration should not come this far -> It would mean that no moves are possible and therefore a draw.
+        // Draw is already checked in LS, but IDE complains of missing return statement without this
         return null;
     }
 }
@@ -231,9 +251,14 @@ public class LS extends javax.swing.JFrame {
 	pack();
     }
 
-    // TODO: 1) Check if square is empty
+    // Check if square is empty
     public static boolean isEmpty(int row, int col) {
-        return true;
+        if (board [row][col] == EMPTY){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     // Action listener which handles mouse clicks on the buttons
@@ -243,24 +268,30 @@ public class LS extends javax.swing.JFrame {
     int i = thisButton.get_i();
     int j = thisButton.get_j();
 
+    // Only allow choosing empty square
     if (isEmpty(i, j)) {
         System.out.println("Button[" + i + "][" + j + "] was clicked by " + turn);  // DEBUG
         thisButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("X.png")));
         place(i, j, turn);
+        // Check if human/player wins after their move
         if (checkResult() == HUMAN_WIN) {
             System.out.println("Player Wins!");
             return;
         }
+        // Check if draw
         if (checkResult() == DRAW) {
             System.out.println("Draw!");
             return;
         }
+        // Otherwise it's the computers turn
         turn = COMPUTER;
 
+        // Calculate optimal move for computer
         Move compMove = new Move(0, 0, 1).findCompMove(0, 1);
         System.out.println("Button[" + compMove.row + "][" + compMove.col + "] was clicked by " + turn);  // DEBUG
         jB[compMove.row][compMove.col].setIcon(new javax.swing.ImageIcon(getClass().getResource("O.png")));
         place(compMove.row, compMove.col, turn);
+        // Check if computer wins
         if (checkResult() == COMPUTER_WIN) {
             System.out.println("Computer Wins!");
             return;
@@ -270,18 +301,17 @@ public class LS extends javax.swing.JFrame {
         System.out.println("Square is not empty, try another one");
     }
 
-	// TODO: 3) Check if we are done (that is COMPUTER or HUMAN wins)
+	// Check if draw after computers move
 	if (checkResult() != CONTINUE) {
         System.out.println("Draw!");
 	    return;
 	}
-        turn = HUMAN;
+    // Otherwise it's the players turn again
+    turn = HUMAN;
     }
 
-    // TODO: 4) This
+    // Check if one player (HUMAN or COMPUTER) wins, if the board is full (DRAW)
     public static int checkResult() {
-	// This function should check if one player (HUMAN or COMPUTER) wins, if the board is full (DRAW)
-	// or if the game should continue. You implement this.
 
         // check for horizontal or vertical win
         for (int i=0; i < SIZE; i++) {
@@ -316,7 +346,7 @@ public class LS extends javax.swing.JFrame {
     public static void place(int row, int col, int player){
 	    board[row][col] = player;
     }
-
+    // Remove marker from board
     public static void unplace(int row, int col) {
         board[row][col] = EMPTY;
     }
